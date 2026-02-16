@@ -1,38 +1,7 @@
 -- =====================================================
--- CRM Omnicanal Esotérico - Seed Data
+-- CRM Omnicanal Esotérico - Seed Data (SIMPLIFIED)
 -- Migration 006: Demo data and initial tags
 -- =====================================================
-
--- =====================================================
--- CREATE DEMO USERS
--- =====================================================
-
--- Note: These users need to be created in Supabase Auth first
--- Then this migration will add them to the users table
-
--- Insert admin user (assuming auth.users already has this email)
-INSERT INTO users (id, email, full_name, role, is_active)
-SELECT 
-  id,
-  'admin@crm-esoterico.com',
-  'Administrador',
-  'admin'::role_type,
-  true
-FROM auth.users
-WHERE email = 'admin@crm-esoterico.com'
-ON CONFLICT (id) DO NOTHING;
-
--- Insert maestro user
-INSERT INTO users (id, email, full_name, role, is_active)
-SELECT 
-  id,
-  'maestro@crm-esoterico.com',
-  'Maestro Demo',
-  'maestro'::role_type,
-  true
-FROM auth.users
-WHERE email = 'maestro@crm-esoterico.com'
-ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
 -- CREATE ESOTERIC TAGS
@@ -66,120 +35,6 @@ INSERT INTO tags (name, color, description) VALUES
 ON CONFLICT (name) DO NOTHING;
 
 -- =====================================================
--- CREATE DEMO LEAD
--- =====================================================
-
-INSERT INTO leads (phone_number, full_name, profile_pic_url, metadata)
-VALUES (
-  '+573001234567',
-  'María García',
-  'https://ui-avatars.com/api/?name=Maria+Garcia&background=8b5cf6&color=fff',
-  '{"source": "whatsapp", "first_contact": "2026-02-16"}'::jsonb
-)
-ON CONFLICT (phone_number) DO NOTHING;
-
--- =====================================================
--- CREATE DEMO CONVERSATION
--- =====================================================
-
-DO $$
-DECLARE
-  demo_lead_id UUID;
-  demo_conversation_id UUID;
-  maestro_user_id UUID;
-BEGIN
-  -- Get the demo lead ID
-  SELECT id INTO demo_lead_id
-  FROM leads
-  WHERE phone_number = '+573001234567'
-  LIMIT 1;
-  
-  -- Get maestro user ID
-  SELECT id INTO maestro_user_id
-  FROM users
-  WHERE role = 'maestro'
-  LIMIT 1;
-  
-  -- Create conversation if lead exists
-  IF demo_lead_id IS NOT NULL THEN
-    INSERT INTO conversations (
-      lead_id,
-      channel,
-      channel_thread_id,
-      status_pipeline,
-      owner_id,
-      last_message_at,
-      unread_count
-    ) VALUES (
-      demo_lead_id,
-      'whatsapp'::channel_type,
-      'whatsapp_thread_123',
-      'nuevo'::pipeline_status,
-      maestro_user_id,
-      NOW() - INTERVAL '5 minutes',
-      1
-    )
-    ON CONFLICT (lead_id, channel) WHERE is_archived = false
-    DO NOTHING
-    RETURNING id INTO demo_conversation_id;
-    
-    -- Create demo messages if conversation was created
-    IF demo_conversation_id IS NOT NULL THEN
-      -- Customer message
-      INSERT INTO messages (
-        conversation_id,
-        channel,
-        sender_type,
-        message_type,
-        content,
-        external_message_id,
-        created_at
-      ) VALUES (
-        demo_conversation_id,
-        'whatsapp'::channel_type,
-        'customer'::sender_type,
-        'text'::message_type,
-        'Hola, necesito una consulta de tarot urgente. ¿Cuánto cuesta?',
-        'wamid.demo123',
-        NOW() - INTERVAL '5 minutes'
-      );
-      
-      -- Agent response
-      INSERT INTO messages (
-        conversation_id,
-        channel,
-        sender_type,
-        message_type,
-        content,
-        created_at
-      ) VALUES (
-        demo_conversation_id,
-        'whatsapp'::channel_type,
-        'agent'::sender_type,
-        'text'::message_type,
-        '¡Hola María! 🌟 Claro que sí. Una lectura de tarot completa tiene un valor de $50.000. ¿Te gustaría agendar una sesión?',
-        NOW() - INTERVAL '3 minutes'
-      );
-      
-      -- Apply some tags to the conversation
-      INSERT INTO conversation_tags (conversation_id, tag_id)
-      SELECT demo_conversation_id, id
-      FROM tags
-      WHERE name IN ('Tarot', 'Cliente nuevo', 'Consulta urgente')
-      ON CONFLICT DO NOTHING;
-      
-      -- Add a demo note
-      INSERT INTO notes (conversation_id, created_by, content)
-      VALUES (
-        demo_conversation_id,
-        maestro_user_id,
-        'Cliente interesada en lectura de tarot. Mencionó que tiene una decisión importante que tomar.'
-      );
-    END IF;
-  END IF;
-END $$;
-
--- =====================================================
 -- CREATE QUICK REPLIES
 -- =====================================================
 
@@ -194,33 +49,23 @@ INSERT INTO quick_replies (shortcut, content, category, is_active) VALUES
 ON CONFLICT (shortcut) DO NOTHING;
 
 -- =====================================================
--- CREATE DEMO ASSIGNMENT RULE
+-- NOTE: Demo users, leads, and conversations
 -- =====================================================
-
-DO $$
-DECLARE
-  maestro_user_id UUID;
-BEGIN
-  SELECT id INTO maestro_user_id
-  FROM users
-  WHERE role = 'maestro'
-  LIMIT 1;
-  
-  IF maestro_user_id IS NOT NULL THEN
-    INSERT INTO assignment_rules (
-      name,
-      priority,
-      is_active,
-      rule_type,
-      conditions,
-      assign_to
-    ) VALUES (
-      'Asignación por defecto a Maestro Demo',
-      1,
-      false, -- Disabled by default
-      'round_robin',
-      '{"channels": ["whatsapp", "instagram", "messenger"]}'::jsonb,
-      maestro_user_id
-    );
-  END IF;
-END $$;
+-- 
+-- Los usuarios demo (admin y maestro) deben crearse manualmente:
+-- 1. Ve a Authentication → Users en Supabase
+-- 2. Crea: admin@crm-esoterico.com
+-- 3. Crea: maestro@crm-esoterico.com
+-- 4. Luego ejecuta este SQL para asignar roles:
+--
+-- INSERT INTO users (id, email, full_name, role, is_active)
+-- SELECT id, email, 'Administrador', 'admin'::role_type, true
+-- FROM auth.users WHERE email = 'admin@crm-esoterico.com'
+-- ON CONFLICT (email) DO UPDATE SET role = 'admin';
+--
+-- INSERT INTO users (id, email, full_name, role, is_active)
+-- SELECT id, email, 'Maestro Demo', 'maestro'::role_type, true
+-- FROM auth.users WHERE email = 'maestro@crm-esoterico.com'
+-- ON CONFLICT (email) DO UPDATE SET role = 'maestro';
+--
+-- =====================================================
