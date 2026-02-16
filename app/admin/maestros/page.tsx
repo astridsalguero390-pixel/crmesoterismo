@@ -1,7 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
-import Link from 'next/link'
-import { UserPlus, Trash2, ArrowLeft } from 'lucide-react'
+import AddMaestroButton from '@/components/admin/AddMaestroButton'
 
 export default async function MaestrosPage() {
     const supabase = await createClient()
@@ -35,10 +32,7 @@ export default async function MaestrosPage() {
                         <h1 className="text-3xl font-bold text-gray-900">Gestión de Maestros</h1>
                         <p className="text-gray-600 mt-2">Administra los usuarios y permisos de los maestros.</p>
                     </div>
-                    {/* Placeholder for Add Maestro Modal/Action */}
-                    <button className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 flex items-center transition">
-                        <UserPlus className="w-4 h-4 mr-2" /> Agregar Maestro
-                    </button>
+                    <AddMaestroButton />
                 </div>
 
                 <div className="bg-white rounded-lg shadow overflow-hidden">
