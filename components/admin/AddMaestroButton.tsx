@@ -73,7 +73,7 @@ export default function AddMaestroButton() {
                                     type="text"
                                     name="fullName"
                                     required
-                                    className="w-full rounded-md border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2"
+                                    className="w-full rounded-md border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2 text-gray-900 bg-white placeholder-gray-500"
                                     placeholder="Juan Pérez"
                                 />
                             </div>
@@ -84,7 +84,7 @@ export default function AddMaestroButton() {
                                     type="email"
                                     name="email"
                                     required
-                                    className="w-full rounded-md border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2"
+                                    className="w-full rounded-md border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2 text-gray-900 bg-white placeholder-gray-500"
                                     placeholder="maestro@ejemplo.com"
                                 />
                             </div>
@@ -95,7 +95,7 @@ export default function AddMaestroButton() {
                                     type="password"
                                     name="password"
                                     required
-                                    className="w-full rounded-md border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2"
+                                    className="w-full rounded-md border border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500 p-2 text-gray-900 bg-white placeholder-gray-500"
                                     placeholder="******"
                                     minLength={6}
                                 />
