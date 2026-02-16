@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { UserPlus, X, Loader2 } from 'lucide-react'
 import { useFormStatus } from 'react-dom'
-import { createMaestro } from './actions'
+import { createMaestro } from '@/app/admin/maestros/actions'
 
 function SubmitButton() {
     const { pending } = useFormStatus()
