@@ -1,3 +1,7 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import Link from 'next/link'
+import { Trash2, ArrowLeft } from 'lucide-react'
 import AddMaestroButton from '@/components/admin/AddMaestroButton'
 
 export default async function MaestrosPage() {
