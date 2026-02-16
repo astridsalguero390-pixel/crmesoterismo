@@ -1,4 +1,4 @@
-supabase/
+/supabase
 node_modules/
 .next/
 out/
